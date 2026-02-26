@@ -1,0 +1,47 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix Build Plan functionality in WorkoutPlanView",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Fix the 'Build My Plan' action so users can successfully generate and save a workout plan from WorkoutPlanView or OnboardingFlow, with proper loading states, error handling, and plan display",
+      "acceptanceCriteria": [
+        "Clicking 'Build My Plan' triggers the backend workout plan generation call without errors.",
+        "A loading indicator is shown while the plan is being generated.",
+        "On success, the generated workout plan is displayed to the user.",
+        "On failure, a clear error message is shown explaining what went wrong.",
+        "The plan-generation mutation in useQueries.ts correctly passes the user's profile data (fitness level, goal) to the backend actor.",
+        "The backend generateWorkoutPlan (or equivalent) method returns a valid plan structure and does not trap or return an error variant silently.",
+        "The 'Build My Plan' button is enabled only when the user profile is available and complete."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review and fix the useGenerateWorkoutPlan mutation to ensure it correctly calls actor.generateWorkoutPlan() without passing any parameters (the backend method takes no arguments and uses the stored profile). Ensure the mutation invalidates the workoutPlan query on success. Add proper error handling that surfaces backend traps or errors to the UI. Verify the mutation is properly typed to return Promise<WeeklyPlan>."
+        },
+        {
+          "path": "frontend/src/components/WorkoutPlanView.tsx",
+          "operation": "modify",
+          "description": "Fix the 'Build My Plan' button handler to properly invoke the generateWorkoutPlan mutation from useQueries. Display a loading spinner or disabled state while mutation.isPending is true. Show an error message using an Alert or toast component when mutation.isError is true, displaying mutation.error.message. Ensure the button is disabled when the user profile is null or incomplete (missing required fields like fitnessLevel or goal). After successful generation, ensure the UI updates to display the new plan data from the refetched query."
+        },
+        {
+          "path": "frontend/src/components/OnboardingFlow.tsx",
+          "operation": "modify",
+          "description": "Review the onboarding completion handler to ensure it correctly calls saveCallerUserProfile followed by generateWorkoutPlan. Add loading state management during both operations. Handle errors from either mutation gracefully with user-visible error messages. Ensure the flow only proceeds to the plan view after both profile save and plan generation complete successfully. Add proper error boundaries or try-catch blocks to prevent silent failures."
+        },
+        {
+          "path": "frontend/src/components/GoalDrivenPlansView.tsx",
+          "operation": "modify",
+          "description": "Review the 'Generate Plan' action in the goal selection flow to ensure it uses the same generateWorkoutPlan mutation pattern as WorkoutPlanView. Add loading and error states consistent with the other views. Ensure the mutation properly invalidates cached queries and navigates to the plan view only after successful generation."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Review the view state management to ensure transitions to 'plan' view only occur after successful plan generation. Add error state handling at the app level if needed to catch and display critical errors from child components. Ensure the QueryClient error handling doesn't swallow backend authorization or runtime traps."
+        }
+      ]
+    }
+  ]
+}

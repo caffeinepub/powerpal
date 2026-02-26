@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [
+    "Build plan functionality is not working for users"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-fix-the-build-my-plan-action-so-that-users-can-successfully-generate-and-save-a-workout-plan-from-the-workoutplanview-or-onboardingflow-the-button-action-must-correctly-call-the-backend-plan-generation-method-handle-loading-and-error-states-and-display-the-resulting-plan-without-errors-or-silent-failures",
+      "title": "Fix the 'Build My Plan' action so that users can successfully generate and save a workout plan from the WorkoutPlanView (or OnboardingFlow). The button/action must correctly call the backend plan-generation method, handle loading and error states, and display the resulting plan without errors or silent failures.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [],
+  "projectName": "Powerpal",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

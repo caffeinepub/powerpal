@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    --background: 0.1 0.01 240;
+    --foreground: 0.97 0.01 90;
+    --card: 0.14 0.015 240;
+    --card-foreground: 0.97 0.01 90;
+    --popover: 0.16 0.015 240;
+    --popover-foreground: 0.97 0.01 90;
+    --primary: 0.65 0.2 145;
+    --primary-foreground: 0.1 0.01 240;
+    --secondary: 0.18 0.02 240;
+    --secondary-foreground: 0.97 0.01 90;
+    --muted: 0.18 0.02 240;
+    --muted-foreground: 0.6 0.02 240;
+    --accent: 0.9 0.18 100;
+    --accent-foreground: 0.1 0.01 240;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.25 0.02 240;
+    --input: 0.2 0.02 240;
+    --ring: 0.65 0.2 145;
+    --chart-1: 0.65 0.2 145;
+    --chart-2: 0.9 0.18 100;
+    --chart-3: 0.6 0.18 200;
+    --chart-4: 0.75 0.15 150;
+    --chart-5: 0.65 0.2 320;
+    --sidebar: 0.12 0.015 240;
+    --sidebar-foreground: 0.97 0.01 90;
+    --sidebar-primary: 0.65 0.2 145;
+    --sidebar-primary-foreground: 0.1 0.01 240;
+    --sidebar-accent: 0.18 0.02 240;
+    --sidebar-accent-foreground: 0.97 0.01 90;
+    --sidebar-border: 0.25 0.02 240;
+    --sidebar-ring: 0.65 0.2 145;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+}
+
+@layer utilities {
+  .glow-green {
+    box-shadow: 0 0 20px oklch(0.65 0.2 145 / 0.4), 0 0 40px oklch(0.65 0.2 145 / 0.15);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 20px oklch(0.65 0.2 145 / 0.4), 0 0 40px oklch(0.65 0.2 145 / 0.15);
+  }
+
+  .glow-yellow {
+    box-shadow: 0 0 20px oklch(0.9 0.18 100 / 0.4), 0 0 40px oklch(0.9 0.18 100 / 0.15);
+  }
+
+  .glow-orange-sm {
+    box-shadow: 0 0 10px oklch(0.65 0.2 145 / 0.35);
+  }
+
+  .text-glow-orange {
+    text-shadow: 0 0 20px oklch(0.65 0.2 145 / 0.8);
+  }
+
+  .text-glow-yellow {
+    text-shadow: 0 0 20px oklch(0.9 0.18 100 / 0.8);
+  }
+
+  .card-athletic {
+    background: oklch(0.14 0.015 240);
+    border: 1px solid oklch(0.25 0.02 240);
+    border-radius: 0.75rem;
+  }
+
+  .card-athletic-hover {
+    transition: all 0.2s ease;
+  }
+
+  .card-athletic-hover:hover {
+    border-color: oklch(0.65 0.2 145 / 0.6);
+    box-shadow: 0 0 20px oklch(0.65 0.2 145 / 0.2);
+  }
+
+  .gradient-orange {
+    background: linear-gradient(135deg, oklch(0.65 0.2 145), oklch(0.72 0.18 130));
+  }
+
+  .gradient-green {
+    background: linear-gradient(135deg, oklch(0.65 0.2 145), oklch(0.72 0.18 130));
+  }
+
+  .gradient-dark {
+    background: linear-gradient(180deg, oklch(0.12 0.015 240), oklch(0.08 0.01 240));
+  }
+
+  .stripe-bg {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      oklch(1 0 0 / 0.02) 10px,
+      oklch(1 0 0 / 0.02) 20px
+    );
+  }
+
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 15px oklch(0.65 0.2 145 / 0.3); }
+    50% { box-shadow: 0 0 30px oklch(0.65 0.2 145 / 0.6), 0 0 60px oklch(0.65 0.2 145 / 0.2); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes speech-pop {
+    0% { opacity: 0; transform: scale(0.8) translateY(5px); }
+    70% { transform: scale(1.05) translateY(-2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+
+  .animate-speech-pop {
+    animation: speech-pop 0.4s ease-out forwards;
+  }
+}

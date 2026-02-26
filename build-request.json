@@ -1,0 +1,43 @@
+{
+  "kind": "build_request",
+  "title": "Fix Build Plan functionality in WorkoutPlanView",
+  "projectName": "Powerpal",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Fix the 'Build My Plan' action so that users can successfully generate and save a workout plan from the WorkoutPlanView (or OnboardingFlow). The button/action must correctly call the backend plan-generation method, handle loading and error states, and display the resulting plan without errors or silent failures.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "its not allowing me to build my plan"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Clicking 'Build My Plan' triggers the backend workout plan generation call without errors.",
+        "A loading indicator is shown while the plan is being generated.",
+        "On success, the generated workout plan is displayed to the user.",
+        "On failure, a clear error message is shown explaining what went wrong.",
+        "The plan-generation mutation in useQueries.ts correctly passes the user's profile data (fitness level, goal) to the backend actor.",
+        "The backend generateWorkoutPlan (or equivalent) method returns a valid plan structure and does not trap or return an error variant silently.",
+        "The 'Build My Plan' button is enabled only when the user profile is available and complete."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All Motoko backend logic must remain in backend/main.mo as a single actor."
+  ],
+  "nonGoals": [
+    "Adding new features such as notifications or progress tracking.",
+    "Redesigning the workout plan UI beyond what is needed to surface the fix.",
+    "Changing the onboarding flow unless it is the direct cause of the broken build-plan action."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
