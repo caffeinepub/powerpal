@@ -63,13 +63,16 @@ export function HomePage({
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center">
-        {/* Logo */}
+        {/* Logo — green tinted */}
         <div className="mb-6 animate-fade-in">
           <img
             src="/assets/generated/powerpal-logo.dim_600x200.png"
             alt="Powerpal"
             className="h-16 md:h-20 object-contain mx-auto"
-            style={{ filter: 'drop-shadow(0 0 20px oklch(0.7 0.22 40 / 0.5))' }}
+            style={{
+              filter:
+                'drop-shadow(0 0 20px oklch(0.65 0.25 145 / 0.7)) hue-rotate(80deg) saturate(1.6) brightness(1.1)',
+            }}
           />
         </div>
 

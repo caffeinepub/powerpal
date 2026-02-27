@@ -1,45 +1,14 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T18:48:56.475Z",
-  "summary": "The diff implements comprehensive fixes for the 'Build My Plan' functionality. WorkoutPlanView, OnboardingFlow, useQueries.ts, and supporting components are all updated. The implementation covers loading states, error handling, plan display, profile data passing, and button enablement. Most acceptance criteria for REQ-1 appear addressed. However, there is no evidence of backend changes (backend/main.mo), so the AC about the backend generateWorkoutPlan method returning a valid plan structure without trapping or silently failing cannot be confirmed. Additionally, the button is enabled based on userProfile existence and authentication, but completeness of the profile is not explicitly validated beyond presence.",
-  "missing_requirements": [
-    {
-      "id": "REQ-1",
-      "requirement": "The backend generateWorkoutPlan (or equivalent) method returns a valid plan structure and does not trap or return an error variant silently.",
-      "reason": "No changes to backend/main.mo are present in the diff. The backend logic is entirely unmodified, so this acceptance criterion cannot be confirmed as addressed.",
-      "evidence": []
-    }
-  ],
-  "hallucinated_features": [
-    {
-      "description": "A new LoginScreen component was added as a dedicated full-page login view for unauthenticated users.",
-      "reason": "The build request does not mention adding a LoginScreen component; it focuses on fixing the Build My Plan action. This goes beyond what was explicitly requested.",
-      "evidence": [
-        "frontend/src/components/LoginScreen.tsx",
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "description": "A new ProfileSetupModal component was added as a full-page profile setup flow for authenticated users without a saved profile.",
-      "reason": "The build request explicitly states that changing the onboarding flow unless it is the direct cause of the broken build-plan action is a non-goal. Adding a brand-new ProfileSetupModal is a new onboarding path not explicitly requested.",
-      "evidence": [
-        "frontend/src/components/ProfileSetupModal.tsx",
-        "frontend/src/App.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.78,
+  "generatedAt": "2026-02-27T20:48:13.239Z",
+  "summary": "REQ-1 is implemented in WorkoutPlanView.tsx. The 'Your Workout Plan' banner section now has a green gradient overlay applied via an absolutely-positioned div over the banner image using Tailwind classes from-green-700/90 via-green-600/70 to-green-500/40. The heading text is white with drop-shadow for legibility. The change is isolated to WorkoutPlanView.tsx and does not affect other views.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.95,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AdaptiveLevelsView.tsx",
-    "frontend/src/components/GoalDrivenPlansView.tsx",
-    "frontend/src/components/LoginScreen.tsx",
-    "frontend/src/components/OnboardingFlow.tsx",
-    "frontend/src/components/ProfileSetupModal.tsx",
     "frontend/src/components/WorkoutPlanView.tsx",
-    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

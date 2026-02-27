@@ -39,6 +39,9 @@ const MESSAGES: Record<MascotContext, string[]> = {
   ],
 };
 
+// The mascot image path — user-provided Hulk image
+const MASCOT_IMG_SRC = '/assets/IMG_0972.webp';
+
 export function PowerpalMascot({
   context,
   customMessage,
@@ -47,6 +50,7 @@ export function PowerpalMascot({
 }: PowerpalMascotProps) {
   const [messageIndex, setMessageIndex] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);
@@ -65,9 +69,9 @@ export function PowerpalMascot({
   const message = customMessage || MESSAGES[context][messageIndex];
 
   const sizeClasses = {
-    sm: { img: 'w-20 h-20', container: 'gap-2', bubble: 'text-xs max-w-[180px]' },
-    md: { img: 'w-28 h-28 md:w-32 md:h-32', container: 'gap-3', bubble: 'text-sm max-w-[220px]' },
-    lg: { img: 'w-36 h-36 md:w-44 md:h-44', container: 'gap-4', bubble: 'text-base max-w-[280px]' },
+    sm: { img: 'w-16 h-20', container: 'gap-2', bubble: 'text-xs max-w-[180px]' },
+    md: { img: 'w-24 h-32 md:w-28 md:h-36', container: 'gap-3', bubble: 'text-sm max-w-[220px]' },
+    lg: { img: 'w-32 h-44 md:w-40 md:h-56', container: 'gap-4', bubble: 'text-base max-w-[280px]' },
   };
 
   const sc = sizeClasses[size];
@@ -102,13 +106,24 @@ export function PowerpalMascot({
       </div>
 
       {/* Mascot Image */}
-      <div className={`${animate ? 'animate-bounce-slow' : ''} flex-shrink-0`}>
-        <img
-          src="/assets/generated/powerpal-mascot.dim_400x400.png"
-          alt="Powerpal mascot"
-          className={`${sc.img} object-contain drop-shadow-lg`}
-          style={{ filter: 'drop-shadow(0 0 12px oklch(0.7 0.22 40 / 0.5))' }}
-        />
+      <div className={`${animate ? 'animate-bounce-slow' : ''} flex-shrink-0 relative`}>
+        {!imgError ? (
+          <img
+            src={MASCOT_IMG_SRC}
+            alt="Powerpal mascot"
+            className={`${sc.img} object-contain`}
+            style={{ filter: 'drop-shadow(0 0 14px oklch(0.65 0.25 145 / 0.6))' }}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          /* Fallback: green circle with "P" if image fails */
+          <div
+            className={`${sc.img} flex items-center justify-center rounded-full bg-primary/20 border-2 border-primary/40`}
+            style={{ filter: 'drop-shadow(0 0 14px oklch(0.65 0.25 145 / 0.6))' }}
+          >
+            <span className="text-primary font-display font-black text-2xl">P</span>
+          </div>
+        )}
       </div>
     </div>
   );

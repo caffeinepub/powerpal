@@ -1,255 +1,234 @@
-import { useState } from 'react';
-import { useSaveCallerUserProfile, useGenerateWorkoutPlan } from '../hooks/useQueries';
+import React, { useState } from 'react';
 import { FitnessLevel, FitnessGoal } from '../backend';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, ArrowRight, Dumbbell, Target, User, AlertCircle } from 'lucide-react';
+import type { Profile } from '../backend';
+import { useSaveProfile, useGenerateWorkoutPlan, useGenerateMealPlan } from '../hooks/useLocalQueries';
+import { PowerpalMascot } from './PowerpalMascot';
 
 interface OnboardingFlowProps {
   onComplete: () => void;
-  onBack: () => void;
 }
 
-type Step = 'personal' | 'fitness-level' | 'goal';
-
 const fitnessLevels = [
-  { value: FitnessLevel.beginner, label: 'Beginner', desc: 'New to fitness or returning after a break' },
+  { value: FitnessLevel.beginner, label: 'Beginner', desc: 'New to fitness or returning after a long break' },
   { value: FitnessLevel.intermediate, label: 'Intermediate', desc: 'Consistent training for 6+ months' },
-  { value: FitnessLevel.advanced, label: 'Advanced', desc: 'Years of dedicated training' },
+  { value: FitnessLevel.advanced, label: 'Advanced', desc: 'Years of dedicated training experience' },
 ];
 
-const goals = [
-  { value: FitnessGoal.weightLoss, label: 'Weight Loss', desc: 'Burn fat and slim down' },
-  { value: FitnessGoal.muscleGain, label: 'Muscle Gain', desc: 'Build strength and size' },
-  { value: FitnessGoal.endurance, label: 'Endurance', desc: 'Improve stamina and cardio' },
-  { value: FitnessGoal.flexibility, label: 'Flexibility', desc: 'Increase mobility and range' },
-  { value: FitnessGoal.generalFitness, label: 'General Fitness', desc: 'Overall health and wellness' },
+const fitnessGoals = [
+  { value: FitnessGoal.weightLoss, label: 'Weight Loss', icon: '🔥', desc: 'Burn fat and slim down' },
+  { value: FitnessGoal.muscleGain, label: 'Muscle Gain', icon: '💪', desc: 'Build strength and size' },
+  { value: FitnessGoal.endurance, label: 'Endurance', icon: '🏃', desc: 'Improve stamina and cardio' },
+  { value: FitnessGoal.flexibility, label: 'Flexibility', icon: '🧘', desc: 'Increase mobility and range' },
+  { value: FitnessGoal.generalFitness, label: 'General Fitness', icon: '⚡', desc: 'Overall health and wellness' },
 ];
 
-export default function OnboardingFlow({ onComplete, onBack }: OnboardingFlowProps) {
-  const [step, setStep] = useState<Step>('personal');
+export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
+  const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [fitnessLevel, setFitnessLevel] = useState<FitnessLevel>(FitnessLevel.beginner);
   const [goal, setGoal] = useState<FitnessGoal>(FitnessGoal.generalFitness);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
-  const saveProfile = useSaveCallerUserProfile();
-  const generatePlan = useGenerateWorkoutPlan();
+  const saveProfile = useSaveProfile();
+  const generateWorkout = useGenerateWorkoutPlan();
+  const generateMeal = useGenerateMealPlan();
 
-  const isSubmitting = saveProfile.isPending || generatePlan.isPending;
+  const isLoading = saveProfile.isPending || generateWorkout.isPending || generateMeal.isPending;
 
-  const handleFinish = async () => {
-    setError(null);
+  const handleStep1 = () => {
+    if (!name.trim()) { setError('Please enter your name.'); return; }
+    const ageNum = parseInt(age, 10);
+    if (isNaN(ageNum) || ageNum < 10 || ageNum > 120) { setError('Please enter a valid age (10–120).'); return; }
+    setError('');
+    setStep(2);
+  };
+
+  const handleStep2 = () => {
+    setError('');
+    setStep(3);
+  };
+
+  const handleComplete = async () => {
+    setError('');
+    const ageNum = parseInt(age, 10);
+    if (isNaN(ageNum) || ageNum < 10 || ageNum > 120) {
+      setError('Please enter a valid age.');
+      return;
+    }
+    const profile: Profile = {
+      name: name.trim(),
+      age: BigInt(ageNum),
+      fitnessLevel,
+      goal,
+    };
     try {
-      await saveProfile.mutateAsync({
-        name,
-        age: BigInt(parseInt(age, 10)),
-        fitnessLevel,
-        goal,
-      });
-      await generatePlan.mutateAsync();
+      await saveProfile.mutateAsync(profile);
+      await generateWorkout.mutateAsync(profile);
+      await generateMeal.mutateAsync(profile);
       onComplete();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(msg || 'Something went wrong. Please try again.');
+    } catch (err) {
+      console.error('Onboarding error:', err);
+      setError('Something went wrong. Please try again.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="px-4 py-3 border-b border-border/30 flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-body text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
-        <div className="flex-1 flex items-center justify-center gap-2">
-          <Dumbbell className="w-5 h-5 text-primary" />
-          <h1 className="font-display text-lg font-black uppercase tracking-widest text-foreground">
-            Setup
-          </h1>
-        </div>
-        <div className="w-16" />
-      </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <div className="w-full max-w-md space-y-6">
-          {/* Step indicator */}
-          <div className="flex items-center justify-center gap-2">
-            {(['personal', 'fitness-level', 'goal'] as Step[]).map((s, i) => (
-              <div key={s} className="flex items-center gap-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold font-display transition-colors ${
-                    step === s
-                      ? 'bg-primary text-primary-foreground'
-                      : ['personal', 'fitness-level', 'goal'].indexOf(step) > i
-                      ? 'bg-primary/40 text-primary-foreground'
-                      : 'bg-card border border-border text-muted-foreground'
-                  }`}
-                >
-                  {i + 1}
-                </div>
-                {i < 2 && <div className="w-8 h-px bg-border" />}
-              </div>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-lg">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <img src="/assets/generated/powerpal-logo.dim_600x200.png" alt="Powerpal" className="h-16 mx-auto mb-4 object-contain" />
+          <div className="flex justify-center mb-4">
+            <PowerpalMascot size="md" context="onboarding" />
+          </div>
+          <div className="flex gap-2 justify-center mb-2">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`h-1.5 w-12 rounded-full transition-all ${s <= step ? 'bg-primary' : 'bg-muted'}`}
+              />
             ))}
           </div>
+          <p className="text-muted-foreground text-sm font-barlow">Step {step} of 3</p>
+        </div>
 
-          {/* Step content */}
-          <div className="bg-card border border-border/40 rounded-2xl p-6 space-y-5">
-            {step === 'personal' && (
-              <>
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  <h2 className="font-display text-xl font-bold uppercase tracking-wide text-foreground">
-                    Personal Info
-                  </h2>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="font-body text-foreground/80">Your Name</Label>
-                  <Input
-                    id="name"
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+          {step === 1 && (
+            <div>
+              <h2 className="text-2xl font-barlow-condensed font-bold text-foreground mb-1 tracking-wide">
+                WELCOME TO POWERPAL
+              </h2>
+              <p className="text-muted-foreground font-barlow mb-6">Let's get to know you first.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-barlow font-semibold text-foreground mb-1">Your Name</label>
+                  <input
+                    type="text"
                     value={name}
-                    onChange={e => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleStep1()}
                     placeholder="Enter your name"
-                    className="bg-background border-border/60"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground font-barlow focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="age" className="font-body text-foreground/80">Age</Label>
-                  <Input
-                    id="age"
+                <div>
+                  <label className="block text-sm font-barlow font-semibold text-foreground mb-1">Your Age</label>
+                  <input
                     type="number"
                     value={age}
-                    onChange={e => setAge(e.target.value)}
+                    onChange={(e) => setAge(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleStep1()}
                     placeholder="Enter your age"
-                    min="10"
-                    max="100"
-                    className="bg-background border-border/60"
+                    min={10}
+                    max={120}
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground font-barlow focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
-                <Button
-                  onClick={() => setStep('fitness-level')}
-                  disabled={!name.trim() || !age || parseInt(age) < 10}
-                  className="w-full font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90"
+              </div>
+              {error && <p className="text-destructive text-sm mt-3 font-barlow">{error}</p>}
+              <button
+                onClick={handleStep1}
+                className="mt-6 w-full bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest py-3 rounded-xl hover:bg-primary/90 transition-colors text-lg"
+              >
+                CONTINUE
+              </button>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <h2 className="text-2xl font-barlow-condensed font-bold text-foreground mb-1 tracking-wide">
+                FITNESS LEVEL
+              </h2>
+              <p className="text-muted-foreground font-barlow mb-6">Where are you starting from?</p>
+              <div className="space-y-3">
+                {fitnessLevels.map((level) => (
+                  <button
+                    key={level.value}
+                    onClick={() => setFitnessLevel(level.value)}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all font-barlow ${
+                      fitnessLevel === level.value
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="font-semibold text-foreground">{level.label}</div>
+                    <div className="text-sm text-muted-foreground">{level.desc}</div>
+                  </button>
+                ))}
+              </div>
+              {error && <p className="text-destructive text-sm mt-3 font-barlow">{error}</p>}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex-1 border border-border text-foreground font-barlow-condensed font-bold tracking-widest py-3 rounded-xl hover:bg-muted transition-colors"
                 >
-                  Next <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </>
-            )}
+                  BACK
+                </button>
+                <button
+                  onClick={handleStep2}
+                  className="flex-1 bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                >
+                  CONTINUE
+                </button>
+              </div>
+            </div>
+          )}
 
-            {step === 'fitness-level' && (
-              <>
-                <div className="flex items-center gap-2">
-                  <Dumbbell className="w-5 h-5 text-primary" />
-                  <h2 className="font-display text-xl font-bold uppercase tracking-wide text-foreground">
-                    Fitness Level
-                  </h2>
-                </div>
-                <div className="space-y-3">
-                  {fitnessLevels.map(level => (
-                    <button
-                      key={level.value}
-                      onClick={() => setFitnessLevel(level.value)}
-                      className={`w-full text-left p-4 rounded-xl border transition-all ${
-                        fitnessLevel === level.value
-                          ? 'border-primary bg-primary/10 shadow-[0_0_12px_oklch(0.7_0.22_142/0.3)]'
-                          : 'border-border/40 bg-background hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="font-display font-bold uppercase tracking-wide text-foreground">
-                        {level.label}
-                      </div>
-                      <div className="text-sm text-muted-foreground font-body mt-1">{level.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setStep('personal')}
-                    className="flex-1 font-display uppercase tracking-widest border-border/60"
+          {step === 3 && (
+            <div>
+              <h2 className="text-2xl font-barlow-condensed font-bold text-foreground mb-1 tracking-wide">
+                YOUR GOAL
+              </h2>
+              <p className="text-muted-foreground font-barlow mb-6">What do you want to achieve?</p>
+              <div className="space-y-2">
+                {fitnessGoals.map((g) => (
+                  <button
+                    key={g.value}
+                    onClick={() => setGoal(g.value)}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all font-barlow flex items-center gap-3 ${
+                      goal === g.value
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                    }`}
                   >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={() => setStep('goal')}
-                    className="flex-1 font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    Next <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {step === 'goal' && (
-              <>
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-primary" />
-                  <h2 className="font-display text-xl font-bold uppercase tracking-wide text-foreground">
-                    Your Goal
-                  </h2>
-                </div>
-                <div className="space-y-3">
-                  {goals.map(g => (
-                    <button
-                      key={g.value}
-                      onClick={() => setGoal(g.value)}
-                      className={`w-full text-left p-4 rounded-xl border transition-all ${
-                        goal === g.value
-                          ? 'border-primary bg-primary/10 shadow-[0_0_12px_oklch(0.7_0.22_142/0.3)]'
-                          : 'border-border/40 bg-background hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="font-display font-bold uppercase tracking-wide text-foreground">
-                        {g.label}
-                      </div>
-                      <div className="text-sm text-muted-foreground font-body mt-1">{g.desc}</div>
-                    </button>
-                  ))}
-                </div>
-
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setStep('fitness-level')}
-                    disabled={isSubmitting}
-                    className="flex-1 font-display uppercase tracking-widest border-border/60"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={handleFinish}
-                    disabled={isSubmitting}
-                    className="flex-1 font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                        {saveProfile.isPending ? 'Saving...' : 'Building...'}
-                      </span>
-                    ) : (
-                      'Build My Plan'
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
+                    <span className="text-2xl">{g.icon}</span>
+                    <div>
+                      <div className="font-semibold text-foreground">{g.label}</div>
+                      <div className="text-sm text-muted-foreground">{g.desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {error && <p className="text-destructive text-sm mt-3 font-barlow">{error}</p>}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={isLoading}
+                  className="flex-1 border border-border text-foreground font-barlow-condensed font-bold tracking-widest py-3 rounded-xl hover:bg-muted transition-colors disabled:opacity-50"
+                >
+                  BACK
+                </button>
+                <button
+                  onClick={handleComplete}
+                  disabled={isLoading}
+                  className="flex-1 bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest py-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+                      BUILDING...
+                    </>
+                  ) : (
+                    'BUILD MY PLAN'
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

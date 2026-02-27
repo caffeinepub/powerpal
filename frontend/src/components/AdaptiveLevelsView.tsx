@@ -1,326 +1,205 @@
 import React, { useState } from 'react';
-import { useGetCallerUserProfile, useSaveCallerUserProfile, useGenerateWorkoutPlan } from '../hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  ArrowLeft,
-  TrendingUp,
-  Zap,
-  Star,
-  Trophy,
-  CheckCircle2,
-  Loader2,
-  Dumbbell,
-  ChevronRight,
-} from 'lucide-react';
+import { CheckCircle2, Dumbbell, Utensils, Calendar, Target } from 'lucide-react';
 import { FitnessLevel } from '../backend';
-import { toast } from 'sonner';
+import type { Profile } from '../backend';
+import { useGetProfile, useSaveProfile, useGenerateWorkoutPlan } from '../hooks/useLocalQueries';
 
 interface AdaptiveLevelsViewProps {
-  onBack: () => void;
-  onViewPlan: () => void;
+  onNavigateToWorkout: () => void;
+  onNavigateToMeal: () => void;
+  onNavigateToSchedule: () => void;
+  onNavigateToGoals: () => void;
 }
 
-const LEVEL_CONFIG = {
-  [FitnessLevel.beginner]: {
+const levels = [
+  {
+    value: FitnessLevel.beginner,
     label: 'Beginner',
-    icon: Star,
-    color: 'text-accent',
-    borderColor: 'border-accent',
-    bgColor: 'bg-accent/10',
-    glowClass: 'glow-yellow',
-    description:
-      'Perfect for those just starting their fitness journey. Focus on building habits and learning proper form.',
-    workoutStyle: 'Light weights, bodyweight exercises, shorter sessions (20–30 min)',
-    frequency: '3 days per week',
-    criteria: [
-      'Complete 12 workouts consistently',
-      'Hold a plank for 30 seconds',
-      'Complete 10 push-ups with good form',
-      'Feel comfortable with basic movements',
-    ],
-    nextLevel: FitnessLevel.intermediate,
+    icon: '🌱',
+    desc: 'New to fitness or returning after a long break',
+    criteria: ['0–6 months of training', 'Focus on form and consistency', 'Lower intensity workouts'],
   },
-  [FitnessLevel.intermediate]: {
+  {
+    value: FitnessLevel.intermediate,
     label: 'Intermediate',
-    icon: TrendingUp,
-    color: 'text-primary',
-    borderColor: 'border-primary',
-    bgColor: 'bg-primary/10',
-    glowClass: 'glow-orange',
-    description:
-      'You have a solid foundation. Time to increase intensity and challenge your body in new ways.',
-    workoutStyle: 'Moderate weights, compound movements, medium sessions (30–45 min)',
-    frequency: '4 days per week',
-    criteria: [
-      'Complete 24 workouts at intermediate level',
-      'Hold a plank for 60 seconds',
-      'Complete 20 push-ups with good form',
-      'Squat your bodyweight for 10 reps',
-    ],
-    nextLevel: FitnessLevel.advanced,
+    icon: '⚡',
+    desc: 'Consistent training for 6+ months',
+    criteria: ['6 months – 2 years of training', 'Comfortable with compound movements', 'Moderate intensity workouts'],
   },
-  [FitnessLevel.advanced]: {
+  {
+    value: FitnessLevel.advanced,
     label: 'Advanced',
-    icon: Trophy,
-    color: 'text-accent',
-    borderColor: 'border-accent',
-    bgColor: 'bg-accent/10',
-    glowClass: 'glow-yellow',
-    description: 'Elite level training. High intensity, complex movements, and peak performance focus.',
-    workoutStyle: 'Heavy weights, advanced techniques, longer sessions (45–60 min)',
-    frequency: '5–6 days per week',
-    criteria: [
-      "You've reached the pinnacle!",
-      'Focus on performance optimization',
-      'Explore specialized training styles',
-      'Consider competing or coaching others',
-    ],
-    nextLevel: null,
+    icon: '🔥',
+    desc: 'Years of dedicated training experience',
+    criteria: ['2+ years of consistent training', 'Strong foundation in all movements', 'High intensity workouts'],
   },
-};
+];
 
-const LEVEL_ORDER = [FitnessLevel.beginner, FitnessLevel.intermediate, FitnessLevel.advanced];
+export default function AdaptiveLevelsView({
+  onNavigateToWorkout,
+  onNavigateToMeal,
+  onNavigateToSchedule,
+  onNavigateToGoals,
+}: AdaptiveLevelsViewProps) {
+  const { data: profile } = useGetProfile();
+  const saveProfile = useSaveProfile();
+  const generateWorkout = useGenerateWorkoutPlan();
 
-export function AdaptiveLevelsView({ onBack, onViewPlan }: AdaptiveLevelsViewProps) {
-  const { data: profile, isLoading } = useGetCallerUserProfile();
-  const saveProfile = useSaveCallerUserProfile();
-  const generateWorkoutPlan = useGenerateWorkoutPlan();
-  const [selectedLevel, setSelectedLevel] = useState<FitnessLevel | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState<FitnessLevel>(
+    profile?.fitnessLevel ?? FitnessLevel.beginner
+  );
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const currentLevel = profile?.fitnessLevel ?? FitnessLevel.beginner;
-  const activeLevel = selectedLevel ?? currentLevel;
-  const config = LEVEL_CONFIG[activeLevel];
-  const LevelIcon = config.icon;
+  const isLoading = saveProfile.isPending || generateWorkout.isPending;
 
-  const handleSaveLevel = async () => {
-    if (!profile || !selectedLevel || selectedLevel === currentLevel) return;
-    setIsSaving(true);
+  const handleApply = async () => {
+    if (!profile) return;
+    setError('');
+    setSuccess(false);
+    const updated: Profile = { ...profile, fitnessLevel: selectedLevel };
     try {
-      await saveProfile.mutateAsync({
-        name: profile.name,
-        age: profile.age,
-        fitnessLevel: selectedLevel,
-        goal: profile.goal,
-      });
-      await generateWorkoutPlan.mutateAsync();
-      toast.success(
-        `Level updated to ${LEVEL_CONFIG[selectedLevel].label}! Your workout plan has been regenerated.`
-      );
-      setSelectedLevel(null);
+      saveProfile.mutate(updated);
+      await generateWorkout.mutateAsync(updated);
+      setSuccess(true);
     } catch {
-      toast.error('Failed to update level. Please try again.');
-    } finally {
-      setIsSaving(false);
+      setError('Something went wrong. Please try again.');
     }
   };
 
-  const hasChanges = selectedLevel !== null && selectedLevel !== currentLevel;
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="relative w-full h-40 md:h-52 overflow-hidden">
-        <img
-          src="/assets/generated/plan-banner.dim_1200x300.png"
-          alt="Adaptive Levels Banner"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
-        <div className="absolute inset-0 flex items-center justify-center">
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <img
             src="/assets/generated/powerpal-logo.dim_600x200.png"
             alt="Powerpal"
-            className="h-10 md:h-14 object-contain"
-            style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.8))' }}
+            className="h-10 object-contain"
+            style={{
+              filter:
+                'drop-shadow(0 0 10px oklch(0.65 0.25 145 / 0.6)) hue-rotate(80deg) saturate(1.6) brightness(1.1)',
+            }}
           />
+          <span className="text-muted-foreground font-barlow text-sm hidden sm:block">Hey, {profile?.name}!</span>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-2xl mx-auto px-4 pb-16 -mt-4">
-        {/* Back + Title */}
-        <div className="flex items-center gap-3 mb-6 animate-slide-up">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            className="text-muted-foreground hover:text-foreground font-heading"
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-barlow-condensed font-bold text-foreground tracking-wide mb-1">
+            ADAPTIVE LEVELS
+          </h1>
+          <p className="text-muted-foreground font-barlow text-sm">Adjust your fitness level to adapt your workout plan</p>
+        </div>
+
+        {/* Nav */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+          <button
+            onClick={onNavigateToWorkout}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back
-          </Button>
-          <div className="flex-1">
-            <h1 className="font-heading text-3xl md:text-4xl text-foreground flex items-center gap-2">
-              <TrendingUp className="w-7 h-7 text-primary" />
-              Adaptive Levels
-            </h1>
-            <p className="text-muted-foreground font-body text-sm mt-0.5">
-              Your fitness level shapes every workout plan
-            </p>
-          </div>
+            <Dumbbell className="w-4 h-4 text-primary" /> Workout
+          </button>
+          <button
+            onClick={onNavigateToMeal}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Utensils className="w-4 h-4 text-primary" /> Meal Plan
+          </button>
+          <button
+            onClick={onNavigateToSchedule}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Calendar className="w-4 h-4 text-primary" /> Schedule
+          </button>
+          <button
+            onClick={onNavigateToGoals}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Target className="w-4 h-4 text-primary" /> Goals
+          </button>
         </div>
 
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-32 w-full rounded-xl bg-secondary" />
-            <Skeleton className="h-48 w-full rounded-xl bg-secondary" />
-          </div>
-        ) : (
-          <>
-            {/* Current Level Banner */}
-            <div
-              className={`card-athletic border-2 ${LEVEL_CONFIG[currentLevel].borderColor} p-5 mb-6 animate-slide-up`}
+        <div className="space-y-4 mb-6">
+          {levels.map((level) => (
+            <button
+              key={level.value}
+              onClick={() => { setSelectedLevel(level.value); setSuccess(false); }}
+              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                selectedLevel === level.value
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border bg-card hover:border-primary/50'
+              }`}
             >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-14 h-14 rounded-2xl ${LEVEL_CONFIG[currentLevel].bgColor} flex items-center justify-center flex-shrink-0 ${LEVEL_CONFIG[currentLevel].glowClass}`}
-                >
-                  {React.createElement(LEVEL_CONFIG[currentLevel].icon, {
-                    className: `w-7 h-7 ${LEVEL_CONFIG[currentLevel].color}`,
-                  })}
-                </div>
-                <div className="flex-1">
-                  <p className="text-muted-foreground font-body text-xs uppercase tracking-widest mb-0.5">
-                    Current Level
-                  </p>
-                  <h2 className={`font-heading text-2xl ${LEVEL_CONFIG[currentLevel].color}`}>
-                    {LEVEL_CONFIG[currentLevel].label}
-                  </h2>
-                  <p className="text-muted-foreground font-body text-sm mt-1">
-                    {LEVEL_CONFIG[currentLevel].description}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Level Selector */}
-            <div className="mb-6 animate-slide-up">
-              <h3 className="font-heading text-lg text-foreground mb-3 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-primary" />
-                Choose Your Level
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                {LEVEL_ORDER.map((level) => {
-                  const cfg = LEVEL_CONFIG[level];
-                  const LvlIcon = cfg.icon;
-                  const isActive = activeLevel === level;
-                  const isCurrent = currentLevel === level;
-                  return (
-                    <button
-                      key={level}
-                      onClick={() => setSelectedLevel(level === currentLevel ? null : level)}
-                      className={`card-athletic p-4 text-center transition-all duration-200 border-2 ${
-                        isActive
-                          ? `${cfg.borderColor} ${cfg.bgColor}`
-                          : 'border-border hover:border-primary/30'
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center ${
-                          isActive ? cfg.bgColor : 'bg-secondary'
-                        }`}
-                      >
-                        <LvlIcon
-                          className={`w-5 h-5 ${isActive ? cfg.color : 'text-muted-foreground'}`}
-                        />
-                      </div>
-                      <p
-                        className={`font-heading text-sm ${
-                          isActive ? cfg.color : 'text-muted-foreground'
-                        }`}
-                      >
-                        {cfg.label}
-                      </p>
-                      {isCurrent && (
-                        <Badge className="mt-1 gradient-orange text-primary-foreground font-heading border-0 text-xs px-1.5 py-0">
-                          Current
-                        </Badge>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Level Details */}
-            <div className="card-athletic p-5 mb-6 animate-slide-up">
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className={`w-10 h-10 rounded-xl ${config.bgColor} flex items-center justify-center`}
-                >
-                  <LevelIcon className={`w-5 h-5 ${config.color}`} />
-                </div>
-                <div>
-                  <h3 className={`font-heading text-xl ${config.color}`}>{config.label} Details</h3>
-                  <p className="text-muted-foreground font-body text-xs">{config.frequency}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-4">
-                <div className="flex items-start gap-2">
-                  <Dumbbell className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-foreground font-body text-sm">{config.workoutStyle}</p>
-                </div>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <p className="font-heading text-sm text-muted-foreground uppercase tracking-widest mb-3">
-                  {config.nextLevel
-                    ? `Criteria to reach ${LEVEL_CONFIG[config.nextLevel].label}`
-                    : "You've reached the top!"}
-                </p>
-                <div className="space-y-2">
-                  {config.criteria.map((criterion, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                      <p className="text-foreground font-body text-sm">{criterion}</p>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{level.icon}</span>
+                  <div>
+                    <div className="font-barlow-condensed font-bold text-lg text-foreground tracking-wide">
+                      {level.label.toUpperCase()}
                     </div>
-                  ))}
+                    <div className="text-sm font-barlow text-muted-foreground">{level.desc}</div>
+                  </div>
                 </div>
+                {selectedLevel === level.value && (
+                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                )}
               </div>
-            </div>
+              <ul className="space-y-1 mt-2">
+                {level.criteria.map((c, i) => (
+                  <li key={i} className="text-xs font-barlow text-muted-foreground flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-primary inline-block" />
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </button>
+          ))}
+        </div>
 
-            {/* Save Button */}
-            {hasChanges && (
-              <div className="animate-slide-up mb-4">
-                <Button
-                  onClick={handleSaveLevel}
-                  disabled={isSaving}
-                  className="w-full gradient-orange text-primary-foreground font-heading text-lg py-6 glow-orange hover:opacity-90 transition-opacity border-0"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Updating & Regenerating Plan...
-                    </>
-                  ) : (
-                    <>
-                      <TrendingUp className="w-5 h-5 mr-2" />
-                      Set Level to {selectedLevel ? LEVEL_CONFIG[selectedLevel].label : ''}
-                    </>
-                  )}
-                </Button>
-                <p className="text-muted-foreground font-body text-xs text-center mt-2">
-                  This will regenerate your workout plan for the new level
-                </p>
-              </div>
-            )}
-
-            {/* View Plan Button */}
-            <Button
-              variant="outline"
-              onClick={onViewPlan}
-              className="w-full border-primary/40 text-primary hover:bg-primary/10 font-heading text-base"
-            >
-              <Dumbbell className="w-4 h-4 mr-2" />
-              View Workout Plan
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </>
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-xl p-3 mb-4 font-barlow text-sm">
+            {error}
+          </div>
         )}
-      </div>
+
+        {success && (
+          <div className="bg-primary/10 border border-primary/30 text-primary rounded-xl p-3 mb-4 font-barlow text-sm flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            Workout plan updated for your new level!
+          </div>
+        )}
+
+        <button
+          onClick={handleApply}
+          disabled={isLoading || selectedLevel === profile?.fitnessLevel}
+          className="w-full bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest py-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {isLoading ? (
+            <>
+              <span className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+              {saveProfile.isPending ? 'Saving...' : 'Regenerating...'}
+            </>
+          ) : (
+            'APPLY & REGENERATE'
+          )}
+        </button>
+      </main>
+
+      <footer className="border-t border-border mt-12 py-6 text-center text-muted-foreground text-xs font-barlow">
+        <p>
+          © {new Date().getFullYear()} Powerpal · Built with{' '}
+          <span className="text-destructive">♥</span> using{' '}
+          <a
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            caffeine.ai
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

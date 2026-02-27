@@ -1,3 +1,4 @@
+// No changes needed - mascot change is entirely frontend!
 import Map "mo:core/Map";
 import Array "mo:core/Array";
 import Nat "mo:core/Nat";
@@ -467,3 +468,4 @@ actor {
     };
   };
 };
+

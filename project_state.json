@@ -1,23 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Fitness/workout plan app with avatar support. User wants the 'Your Workout Plan' section background changed to green.",
   "architectural_notes": [],
-  "known_issues": [
-    "Build plan functionality is not working for users"
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-the-build-my-plan-action-so-that-users-can-successfully-generate-and-save-a-workout-plan-from-the-workoutplanview-or-onboardingflow-the-button-action-must-correctly-call-the-backend-plan-generation-method-handle-loading-and-error-states-and-display-the-resulting-plan-without-errors-or-silent-failures",
-      "title": "Fix the 'Build My Plan' action so that users can successfully generate and save a workout plan from the WorkoutPlanView (or OnboardingFlow). The button/action must correctly call the backend plan-generation method, handle loading and error states, and display the resulting plan without errors or silent failures.",
+      "id": "feature-in-workoutplanview-tsx-change-the-background-color-of-the-your-workout-plan-banner-header-section-to-green-apply-a-solid-green-background-e-g-tailwind-class-bg-green-600-or-similar-green-shade-to-the-section-or-container-that-displays-the-your-workout-plan-heading",
+      "title": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Change background color of 'Your Workout Plan' section to green",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
   "projectName": "Powerpal",
   "clarification_mode": "instant",
   "clarification_rounds": 0

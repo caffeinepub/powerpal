@@ -1,298 +1,186 @@
-import { useState } from 'react';
-import { useGetWorkoutPlan, useGenerateWorkoutPlan, useGetCallerUserProfile } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { Dumbbell, RefreshCw, Utensils, Calendar, Target, TrendingUp } from 'lucide-react';
+import { useGetProfile, useGetWorkoutPlan, useGenerateWorkoutPlan } from '../hooks/useLocalQueries';
 import { PowerpalMascot } from './PowerpalMascot';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import {
-  ArrowLeft,
-  RefreshCw,
-  Utensils,
-  Layers,
-  Calendar,
-  Target,
-  Dumbbell,
-  Clock,
-  RotateCcw,
-  LogOut,
-  AlertCircle,
-} from 'lucide-react';
 
 interface WorkoutPlanViewProps {
-  onBack: () => void;
-  onViewMealPlan: () => void;
-  onViewAdaptiveLevels: () => void;
-  onViewWeeklySchedule: () => void;
-  onViewGoalDrivenPlans: () => void;
+  onNavigateToMeal: () => void;
+  onNavigateToSchedule: () => void;
+  onNavigateToGoals: () => void;
+  onNavigateToAdaptive: () => void;
 }
 
 export default function WorkoutPlanView({
-  onBack,
-  onViewMealPlan,
-  onViewAdaptiveLevels,
-  onViewWeeklySchedule,
-  onViewGoalDrivenPlans,
+  onNavigateToMeal,
+  onNavigateToSchedule,
+  onNavigateToGoals,
+  onNavigateToAdaptive,
 }: WorkoutPlanViewProps) {
+  const { data: profile } = useGetProfile();
   const { data: plan, isLoading: planLoading } = useGetWorkoutPlan();
-  const { data: userProfile } = useGetCallerUserProfile();
   const generatePlan = useGenerateWorkoutPlan();
-  const { clear, identity } = useInternetIdentity();
-  const queryClient = useQueryClient();
-  const [generateError, setGenerateError] = useState<string | null>(null);
 
-  const isAuthenticated = !!identity;
-
-  const handleGenerate = async () => {
-    setGenerateError(null);
-    try {
-      await generatePlan.mutateAsync();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setGenerateError(msg || 'Failed to generate workout plan. Please try again.');
+  const handleGenerate = () => {
+    if (profile) {
+      generatePlan.mutate(profile);
     }
   };
 
-  const handleLogout = async () => {
-    await clear();
-    queryClient.clear();
-  };
-
-  const canGenerate = !!userProfile && isAuthenticated;
+  const isGenerating = generatePlan.isPending;
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border/30 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-body"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back</span>
-          </button>
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <img
+            src="/assets/generated/powerpal-logo.dim_600x200.png"
+            alt="Powerpal"
+            className="h-10 object-contain"
+            style={{
+              filter:
+                'drop-shadow(0 0 10px oklch(0.65 0.25 145 / 0.6)) hue-rotate(80deg) saturate(1.6) brightness(1.1)',
+            }}
+          />
           <div className="flex items-center gap-2">
-            <Dumbbell className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-lg font-black uppercase tracking-widest text-foreground">
-              My Plan
-            </h1>
+            <span className="text-muted-foreground font-barlow text-sm hidden sm:block">
+              Hey, {profile?.name}!
+            </span>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors text-sm font-body"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Mascot */}
-        <div className="flex justify-center">
-          <PowerpalMascot context="plan" size="sm" animate={true} />
-        </div>
-
-        {/* Action buttons */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Button
-            onClick={handleGenerate}
-            disabled={generatePlan.isPending || !canGenerate}
-            className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-display uppercase tracking-wide text-xs"
-          >
-            {generatePlan.isPending ? (
-              <>
-                <span className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                Building...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-3 h-3" />
-                {plan ? 'Regenerate' : 'Build My Plan'}
-              </>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onViewMealPlan}
-            className="flex items-center gap-2 border-border/60 font-display uppercase tracking-wide text-xs"
-          >
-            <Utensils className="w-3 h-3" />
-            Meal Plan
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onViewWeeklySchedule}
-            className="flex items-center gap-2 font-display uppercase tracking-wide text-xs text-muted-foreground hover:text-foreground"
-          >
-            <Calendar className="w-3 h-3" />
-            Schedule
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onViewGoalDrivenPlans}
-            className="flex items-center gap-2 font-display uppercase tracking-wide text-xs text-muted-foreground hover:text-foreground"
-          >
-            <Target className="w-3 h-3" />
-            Goals
-          </Button>
-        </div>
-
-        {/* Adaptive levels button */}
-        <Button
-          variant="ghost"
-          onClick={onViewAdaptiveLevels}
-          className="w-full flex items-center gap-2 font-display uppercase tracking-wide text-xs text-muted-foreground hover:text-foreground border border-border/30"
-        >
-          <Layers className="w-3 h-3" />
-          Adaptive Levels
-        </Button>
-
-        {/* Error */}
-        {generateError && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{generateError}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* No profile warning */}
-        {!userProfile && !planLoading && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Please complete your profile setup to build a workout plan.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Loading */}
-        {planLoading && (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-muted-foreground font-body">Loading your plan...</p>
-          </div>
-        )}
-
-        {/* No plan yet */}
-        {!planLoading && !plan && !generatePlan.isPending && (
-          <div className="text-center py-16 space-y-4">
-            <Dumbbell className="w-16 h-16 text-primary/30 mx-auto" />
-            <h2 className="font-display text-2xl font-black uppercase tracking-tight text-foreground">
-              No Plan Yet
-            </h2>
-            <p className="text-muted-foreground font-body max-w-sm mx-auto">
-              Click "Build My Plan" above to generate your personalized workout plan based on your goals.
-            </p>
-            <Button
-              onClick={handleGenerate}
-              disabled={generatePlan.isPending || !canGenerate}
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-display uppercase tracking-widest"
-            >
-              Build My Plan
-            </Button>
-          </div>
-        )}
-
-        {/* Generating state */}
-        {generatePlan.isPending && (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-muted-foreground font-body">Building your personalized plan...</p>
-          </div>
-        )}
-
-        {/* Plan display */}
-        {plan && !generatePlan.isPending && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-xl font-black uppercase tracking-tight text-foreground">
-                Weekly Schedule
-              </h2>
-              {userProfile && (
-                <Badge
-                  variant="outline"
-                  className="font-body text-xs border-primary/40 text-primary"
-                >
-                  {userProfile.goal}
-                </Badge>
-              )}
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Banner */}
+        <div className="relative rounded-2xl overflow-hidden mb-6">
+          <img
+            src="/assets/generated/plan-banner.dim_1200x300.png"
+            alt="Workout Plan"
+            className="w-full h-32 sm:h-48 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-green-700/90 via-green-600/70 to-green-500/40 flex items-center px-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-barlow-condensed font-bold text-white tracking-wide drop-shadow-md">
+                YOUR WORKOUT PLAN
+              </h1>
+              <p className="text-green-100 font-barlow text-sm drop-shadow">
+                {profile?.goal?.replace(/([A-Z])/g, ' $1').trim()} · {profile?.fitnessLevel}
+              </p>
             </div>
+          </div>
+        </div>
 
-            <div className="space-y-3">
-              {plan.days.map((day, idx) => (
-                <div
-                  key={idx}
-                  className={`rounded-xl border p-4 transition-all ${
-                    day.rest ? 'border-border/30 bg-card/50' : 'border-border/60 bg-card'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-display font-bold uppercase tracking-wide text-foreground">
-                      {day.day}
-                    </h3>
-                    {day.rest ? (
-                      <Badge variant="secondary" className="font-body text-xs">
-                        Rest Day
-                      </Badge>
-                    ) : (
-                      <Badge className="font-body text-xs bg-primary/20 text-primary border-primary/30">
-                        Active
-                      </Badge>
-                    )}
-                  </div>
+        {/* Mascot + Generate */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+          <PowerpalMascot size="sm" context="plan" />
+          <div className="flex-1 flex flex-wrap gap-2 justify-center sm:justify-start">
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="flex items-center gap-2 bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
+            >
+              {isGenerating ? (
+                <span className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {plan ? 'REGENERATE' : 'BUILD PLAN'}
+            </button>
+          </div>
+        </div>
 
-                  {!day.rest && day.exercises.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      {day.exercises.map((exercise, eIdx) => (
-                        <div
-                          key={eIdx}
-                          className="flex items-center justify-between bg-background/60 rounded-lg px-3 py-2"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Dumbbell className="w-3 h-3 text-primary flex-shrink-0" />
-                            <span className="font-body text-sm text-foreground">
-                              {exercise.name}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground font-body">
-                            {Number(exercise.sets) > 0 && (
-                              <span>
-                                <RotateCcw className="w-3 h-3 inline mr-1" />
-                                {Number(exercise.sets)}×{Number(exercise.reps)}
-                              </span>
-                            )}
-                            {Number(exercise.durationMinutes) > 0 && (
-                              <span>
-                                <Clock className="w-3 h-3 inline mr-1" />
-                                {Number(exercise.durationMinutes)}min
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+        {/* Nav buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+          <button
+            onClick={onNavigateToMeal}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Utensils className="w-4 h-4 text-primary" /> Meal Plan
+          </button>
+          <button
+            onClick={onNavigateToSchedule}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Calendar className="w-4 h-4 text-primary" /> Schedule
+          </button>
+          <button
+            onClick={onNavigateToGoals}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Target className="w-4 h-4 text-primary" /> Goals
+          </button>
+          <button
+            onClick={onNavigateToAdaptive}
+            className="flex items-center gap-2 justify-center border border-border text-foreground font-barlow text-sm px-3 py-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <TrendingUp className="w-4 h-4 text-primary" /> Levels
+          </button>
+        </div>
 
-                  {day.rest && (
-                    <p className="text-sm text-muted-foreground font-body mt-1">
-                      Recovery & rest — your muscles grow on rest days!
-                    </p>
+        {/* Plan */}
+        {planLoading && (
+          <div className="text-center py-12 text-muted-foreground font-barlow animate-pulse">Loading plan...</div>
+        )}
+
+        {!planLoading && !plan && (
+          <div className="text-center py-12">
+            <Dumbbell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-barlow">No plan yet. Hit "BUILD PLAN" to get started!</p>
+          </div>
+        )}
+
+        {plan && (
+          <div className="space-y-3">
+            {plan.days.map((day, idx) => (
+              <div
+                key={idx}
+                className={`rounded-xl border p-4 ${day.rest ? 'border-border bg-muted/30' : 'border-border bg-card'}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-barlow-condensed font-bold text-lg tracking-wide text-foreground">
+                    {day.day.toUpperCase()}
+                  </h3>
+                  {day.rest ? (
+                    <span className="text-xs font-barlow font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                      REST DAY
+                    </span>
+                  ) : (
+                    <span className="text-xs font-barlow font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      TRAINING
+                    </span>
                   )}
                 </div>
-              ))}
-            </div>
+                {!day.rest && day.exercises.length > 0 && (
+                  <div className="space-y-2">
+                    {day.exercises.map((ex, eIdx) => (
+                      <div key={eIdx} className="flex items-center justify-between text-sm font-barlow">
+                        <span className="text-foreground font-semibold">{ex.name}</span>
+                        <span className="text-muted-foreground">
+                          {Number(ex.durationMinutes) > 0
+                            ? `${ex.durationMinutes} min`
+                            : `${ex.sets}×${ex.reps}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+        )}
+
+        {generatePlan.isError && (
+          <p className="text-destructive text-sm mt-4 font-barlow text-center">
+            Failed to generate plan. Please try again.
+          </p>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-4 text-center border-t border-border/30 mt-8">
-        <p className="text-xs text-muted-foreground font-body">
-          © {new Date().getFullYear()} Powerpal. Built with{' '}
-          <span className="text-red-400">♥</span> using{' '}
+      <footer className="border-t border-border mt-12 py-6 text-center text-muted-foreground text-xs font-barlow">
+        <p>
+          © {new Date().getFullYear()} Powerpal · Built with{' '}
+          <span className="text-destructive">♥</span> using{' '}
           <a
             href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
             target="_blank"

@@ -2,14 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-build-my-plan-action-so-that-users-can-successfully-generate-and-save-a-workout-plan-from-the-workoutplanview-or-onboardingflow-the-button-action-must-correctly-call-the-backend-plan-generation-method-handle-loading-and-error-states-and-display-the-resulting-plan-without-errors-or-silent-failures",
-      "featureTitle": "Fix the 'Build My Plan' action so that users can successfully generate and save a workout plan from the WorkoutPlanView (or OnboardingFlow). The button/action must correctly call the backend plan-generation method, handle loading and error states, and display the resulting plan without errors or silent failures.",
+      "featureId": "feature-in-workoutplanview-tsx-change-the-background-color-of-the-your-workout-plan-banner-header-section-to-green-apply-a-solid-green-background-e-g-tailwind-class-bg-green-600-or-similar-green-shade-to-the-section-or-container-that-displays-the-your-workout-plan-heading",
+      "featureTitle": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/GoalDrivenPlansView.tsx",
-        "frontend/src/components/OnboardingFlow.tsx",
-        "frontend/src/components/WorkoutPlanView.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/WorkoutPlanView.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",

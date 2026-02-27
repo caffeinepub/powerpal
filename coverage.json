@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T18:48:56.477Z",
+  "generatedAt": "2026-02-27T20:48:13.241Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,21 +12,13 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the 'Build My Plan' action so that users can successfully generate and save a workout plan from the WorkoutPlanView (or OnboardingFlow). The button/action must correctly call the backend plan-generation method, handle loading and error states, and display the resulting plan without errors or silent failures.",
+        "summary": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/WorkoutPlanView.tsx",
-          "frontend/src/components/OnboardingFlow.tsx",
-          "frontend/src/components/GoalDrivenPlansView.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/WorkoutPlanView.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/WorkoutPlanView.tsx",
-          "frontend/src/components/OnboardingFlow.tsx",
-          "frontend/src/components/GoalDrivenPlansView.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/WorkoutPlanView.tsx"
         ]
       }
     ]
@@ -36,14 +28,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AdaptiveLevelsView.tsx",
-    "frontend/src/components/GoalDrivenPlansView.tsx",
-    "frontend/src/components/LoginScreen.tsx",
-    "frontend/src/components/OnboardingFlow.tsx",
-    "frontend/src/components/ProfileSetupModal.tsx",
     "frontend/src/components/WorkoutPlanView.tsx",
-    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
