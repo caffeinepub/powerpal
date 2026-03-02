@@ -1,21 +1,88 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Change 'Your Workout Plan' section background to green",
+  "title": "Remove login requirement — replace with name/age entry to get started",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Change the background color of the 'Your Workout Plan' banner/header section to green in WorkoutPlanView.tsx",
+      "summary": "Remove Internet Identity login screen and replace with a simple name/age entry onboarding screen",
       "acceptanceCriteria": [
-        "The section or banner containing the text 'Your Workout Plan' has a green background color",
-        "The heading text remains legible against the green background",
-        "No other sections or views are unintentionally affected by this color change"
+        "The app does not show an Internet Identity login button on first load.",
+        "The first screen a new user sees asks for their name and age only.",
+        "After entering name and age and submitting, the user is taken directly into the main app experience.",
+        "No authentication is required to use the app."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/LoginScreen.tsx",
+          "operation": "delete",
+          "description": "Remove the Internet Identity login screen component as it is no longer the entry point for the application."
+        },
+        {
+          "path": "frontend/src/components/OnboardingFlow.tsx",
+          "operation": "modify",
+          "description": "Simplify the onboarding flow to collect only name and age (remove fitness level and goal selection). Update to use localStorage utilities instead of backend actor for profile persistence. Remove authentication dependencies and Internet Identity checks."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Remove Internet Identity authentication logic and replace with localStorage-based profile check. Show the simplified OnboardingFlow component when no profile exists in localStorage, otherwise show the main app views directly. Remove ProfileSetupModal usage and authentication state management."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Update the landing page to remove any references to login/authentication and adjust CTA buttons to work with the localStorage-based profile flow instead of authentication state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Persist name and age in localStorage and skip onboarding on subsequent visits",
+      "acceptanceCriteria": [
+        "On subsequent visits, if a name and age are already stored in localStorage, the user skips the entry screen and goes directly to the main app.",
+        "Workout and meal plan generation works without an authenticated identity.",
+        "Profile is stored and retrieved from localStorage using existing utility functions."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/localStorage.ts",
+          "operation": "modify",
+          "description": "Ensure the existing localStorage profile utilities support a minimal profile structure with only name and age fields. Update serialization to handle profiles that may not include fitnessLevel or goal if those become optional."
+        },
+        {
+          "path": "frontend/src/hooks/useLocalQueries.ts",
+          "operation": "modify",
+          "description": "Update the useLocalProfile hook to work with the simplified profile structure containing only name and age. Ensure useLocalWorkoutPlan and useLocalMealPlan generate plans using default fitness level and goal values when the user profile contains only name and age."
+        },
+        {
           "path": "frontend/src/components/WorkoutPlanView.tsx",
           "operation": "modify",
-          "description": "Update the background color of the banner/header section containing 'Your Workout Plan' heading to green. Apply a Tailwind green background class (e.g., 'bg-green-600') to the container element that wraps the heading text. Ensure text contrast remains accessible against the green background by adjusting text color if needed."
+          "description": "Update to use localStorage-based hooks from useLocalQueries instead of backend actor hooks. Ensure plan generation and display work with the minimal profile data stored locally."
+        },
+        {
+          "path": "frontend/src/components/MealPlanView.tsx",
+          "operation": "modify",
+          "description": "Update to use localStorage-based hooks from useLocalQueries instead of backend actor hooks. Ensure meal plan generation and display work with the minimal profile data stored locally."
+        },
+        {
+          "path": "frontend/src/components/WeeklyScheduleView.tsx",
+          "operation": "modify",
+          "description": "Update to use localStorage-based workout plan hook from useLocalQueries instead of backend actor hook. Ensure schedule display and completion tracking work with locally stored plans."
+        },
+        {
+          "path": "frontend/src/components/GoalDrivenPlansView.tsx",
+          "operation": "modify",
+          "description": "Update to use localStorage-based profile and plan hooks from useLocalQueries. When the user selects a new goal, update the localStorage profile and regenerate plans locally without requiring backend authentication."
+        },
+        {
+          "path": "frontend/src/components/AdaptiveLevelsView.tsx",
+          "operation": "modify",
+          "description": "Update to use localStorage-based profile and plan hooks from useLocalQueries. When the user selects a new fitness level, update the localStorage profile and regenerate the workout plan locally without requiring backend authentication."
+        },
+        {
+          "path": "frontend/src/utils/planGenerator.ts",
+          "operation": "modify",
+          "description": "Update plan generation utilities to handle profiles that may only contain name and age by using sensible defaults for fitnessLevel (beginner) and goal (generalFitness) when those fields are missing."
         }
       ]
     }

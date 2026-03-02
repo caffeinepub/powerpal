@@ -21,9 +21,7 @@ export default function WorkoutPlanView({
   const generatePlan = useGenerateWorkoutPlan();
 
   const handleGenerate = () => {
-    if (profile) {
-      generatePlan.mutate(profile);
-    }
+    generatePlan.mutate(undefined);
   };
 
   const isGenerating = generatePlan.isPending;

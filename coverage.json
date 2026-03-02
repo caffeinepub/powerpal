@@ -1,34 +1,71 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T20:48:13.241Z",
+  "generatedAt": "2026-02-27T21:15:51.372Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
+        "summary": "Remove the Internet Identity login screen as the entry point. Instead, show a simple onboarding screen where the user enters only their name and age, then proceeds directly into the app without any authentication step.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/WorkoutPlanView.tsx"
+          "frontend/src/components/LoginScreen.tsx",
+          "frontend/src/components/OnboardingFlow.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/pages/HomePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/WorkoutPlanView.tsx"
+          "frontend/src/components/LoginScreen.tsx",
+          "frontend/src/components/OnboardingFlow.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Persist the entered name and age locally (localStorage) so the user does not need to re-enter them on subsequent visits. Profile data (name, age) should be read from and written to localStorage instead of requiring a logged-in backend actor.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/localStorage.ts",
+          "frontend/src/hooks/useLocalQueries.ts",
+          "frontend/src/components/WorkoutPlanView.tsx",
+          "frontend/src/components/MealPlanView.tsx",
+          "frontend/src/components/WeeklyScheduleView.tsx",
+          "frontend/src/components/GoalDrivenPlansView.tsx",
+          "frontend/src/components/AdaptiveLevelsView.tsx",
+          "frontend/src/utils/planGenerator.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useLocalQueries.ts",
+          "frontend/src/components/WorkoutPlanView.tsx",
+          "frontend/src/components/MealPlanView.tsx",
+          "frontend/src/components/WeeklyScheduleView.tsx",
+          "frontend/src/components/GoalDrivenPlansView.tsx",
+          "frontend/src/components/AdaptiveLevelsView.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdaptiveLevelsView.tsx",
+    "frontend/src/components/GoalDrivenPlansView.tsx",
+    "frontend/src/components/LoginScreen.tsx",
+    "frontend/src/components/MealPlanView.tsx",
+    "frontend/src/components/OnboardingFlow.tsx",
+    "frontend/src/components/WeeklyScheduleView.tsx",
     "frontend/src/components/WorkoutPlanView.tsx",
+    "frontend/src/hooks/useLocalQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

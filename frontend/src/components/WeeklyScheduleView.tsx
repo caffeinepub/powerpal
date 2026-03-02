@@ -22,7 +22,7 @@ export default function WeeklyScheduleView({
   const [completedDays, setCompletedDays] = useState<Set<number>>(new Set());
 
   const handleRegenerate = () => {
-    if (profile) generatePlan.mutate(profile);
+    generatePlan.mutate(undefined);
   };
 
   const toggleComplete = (idx: number) => {
@@ -59,7 +59,7 @@ export default function WeeklyScheduleView({
           <h1 className="text-2xl sm:text-3xl font-barlow-condensed font-bold text-foreground tracking-wide mb-1">
             WEEKLY SCHEDULE
           </h1>
-          <p className="text-muted-foreground font-barlow text-sm">Track your weekly training progress</p>
+          <p className="text-muted-foreground font-barlow text-sm">Track your workouts day by day</p>
         </div>
 
         {/* Nav */}
@@ -90,126 +90,120 @@ export default function WeeklyScheduleView({
           </button>
         </div>
 
-        {/* Progress + Regenerate */}
-        <div className="flex items-center justify-between mb-6 gap-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-barlow text-sm text-muted-foreground">Weekly Progress</span>
-              <span className="font-barlow-condensed font-bold text-primary text-sm">
+        {/* Progress */}
+        {plan && (
+          <div className="bg-card border border-border rounded-xl p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-barlow-condensed font-bold text-foreground tracking-wide">WEEKLY PROGRESS</span>
+              <span className="text-primary font-barlow font-semibold text-sm">
                 {completedCount}/{trainingDays} days
               </span>
             </div>
             <div className="w-full bg-muted rounded-full h-2">
               <div
-                className="bg-primary h-2 rounded-full transition-all duration-500"
+                className="bg-primary h-2 rounded-full transition-all"
                 style={{ width: trainingDays > 0 ? `${(completedCount / trainingDays) * 100}%` : '0%' }}
               />
             </div>
           </div>
+        )}
+
+        {/* Regenerate */}
+        <div className="flex justify-end mb-4">
           <button
             onClick={handleRegenerate}
             disabled={generatePlan.isPending}
-            className="flex items-center gap-2 bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60 text-sm flex-shrink-0"
+            className="flex items-center gap-2 bg-primary text-primary-foreground font-barlow-condensed font-bold tracking-widest px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
           >
             {generatePlan.isPending ? (
-              <span className="animate-spin w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full" />
+              <span className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
             ) : (
-              <RefreshCw className="w-3 h-3" />
+              <RefreshCw className="w-4 h-4" />
             )}
-            REGENERATE
+            {plan ? 'REGENERATE' : 'BUILD PLAN'}
           </button>
         </div>
 
         {isLoading && (
-          <div className="text-center py-12 text-muted-foreground font-barlow animate-pulse">Loading schedule...</div>
+          <div className="text-center py-12 text-muted-foreground font-barlow animate-pulse">Loading...</div>
         )}
 
         {!isLoading && !plan && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground font-barlow">No plan yet. Go to Workout Plan to build one!</p>
+            <p className="text-muted-foreground font-barlow">No plan yet. Hit "BUILD PLAN" to get started!</p>
           </div>
         )}
 
         {plan && (
-          <div className="space-y-2">
-            {plan.days.map((day, idx) => {
-              const isExpanded = expandedDay === idx;
-              const isCompleted = completedDays.has(idx);
-              const isTraining = !day.rest;
-
-              return (
+          <div className="space-y-3">
+            {plan.days.map((day, idx) => (
+              <div
+                key={idx}
+                className={`rounded-xl border transition-all ${
+                  day.rest
+                    ? 'border-border bg-muted/30'
+                    : completedDays.has(idx)
+                    ? 'border-primary/50 bg-primary/5'
+                    : 'border-border bg-card'
+                }`}
+              >
                 <div
-                  key={idx}
-                  className={`rounded-xl border transition-all ${
-                    isCompleted
-                      ? 'border-primary/40 bg-primary/5'
-                      : day.rest
-                      ? 'border-border bg-muted/20'
-                      : 'border-border bg-card'
-                  }`}
+                  className="flex items-center justify-between p-4 cursor-pointer"
+                  onClick={() => !day.rest && setExpandedDay(expandedDay === idx ? null : idx)}
                 >
-                  <div className="flex items-center gap-3 p-4">
-                    {/* Complete toggle */}
-                    {isTraining && (
+                  <div className="flex items-center gap-3">
+                    {!day.rest && (
                       <button
-                        onClick={() => toggleComplete(idx)}
-                        className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); toggleComplete(idx); }}
+                        className="text-primary hover:text-primary/80 transition-colors"
                       >
-                        {isCompleted ? (
+                        {completedDays.has(idx) ? (
                           <CheckCircle2 className="w-5 h-5" />
                         ) : (
-                          <Circle className="w-5 h-5 text-muted-foreground" />
+                          <Circle className="w-5 h-5" />
                         )}
                       </button>
                     )}
-                    {day.rest && <div className="w-5 h-5 flex-shrink-0" />}
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-barlow-condensed font-bold text-foreground tracking-wide">
-                          {day.day.toUpperCase()}
+                    <h3 className="font-barlow-condensed font-bold text-lg tracking-wide text-foreground">
+                      {day.day.toUpperCase()}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {day.rest ? (
+                      <span className="text-xs font-barlow font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        REST DAY
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-xs font-barlow font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          TRAINING
                         </span>
-                        {day.rest ? (
-                          <span className="text-xs font-barlow text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                            REST
-                          </span>
+                        {expandedDay === idx ? (
+                          <ChevronUp className="w-4 h-4 text-muted-foreground" />
                         ) : (
-                          <span className={`text-xs font-barlow font-semibold px-2 py-0.5 rounded-full ${
-                            isCompleted ? 'text-primary bg-primary/10' : 'text-primary bg-primary/10'
-                          }`}>
-                            {isCompleted ? '✓ DONE' : `${day.exercises.length} EXERCISES`}
-                          </span>
+                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
                         )}
-                      </div>
-                    </div>
-
-                    {isTraining && day.exercises.length > 0 && (
-                      <button
-                        onClick={() => setExpandedDay(isExpanded ? null : idx)}
-                        className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </button>
+                      </>
                     )}
                   </div>
-
-                  {isExpanded && isTraining && (
-                    <div className="px-4 pb-4 space-y-2 border-t border-border pt-3">
-                      {day.exercises.map((ex, eIdx) => (
-                        <div key={eIdx} className="flex items-center justify-between text-sm font-barlow">
-                          <span className="text-foreground font-semibold">{ex.name}</span>
-                          <span className="text-muted-foreground">
-                            {Number(ex.durationMinutes) > 0
-                              ? `${ex.durationMinutes} min`
-                              : `${ex.sets}×${ex.reps}`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              );
-            })}
+
+                {expandedDay === idx && !day.rest && day.exercises.length > 0 && (
+                  <div className="px-4 pb-4 space-y-2 border-t border-border pt-3">
+                    {day.exercises.map((ex, eIdx) => (
+                      <div key={eIdx} className="flex items-center justify-between text-sm font-barlow">
+                        <span className="text-foreground font-semibold">{ex.name}</span>
+                        <span className="text-muted-foreground">
+                          {Number(ex.durationMinutes) > 0
+                            ? `${ex.durationMinutes} min`
+                            : `${ex.sets}×${ex.reps}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </main>

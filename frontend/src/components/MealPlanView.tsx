@@ -23,7 +23,7 @@ export default function MealPlanView({
   const [selectedDay, setSelectedDay] = useState(0);
 
   const handleGenerate = () => {
-    if (profile) generateMeal.mutate(profile);
+    generateMeal.mutate(undefined);
   };
 
   const dayPlan = mealPlan?.days[selectedDay];

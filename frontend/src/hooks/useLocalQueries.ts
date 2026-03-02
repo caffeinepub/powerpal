@@ -40,8 +40,10 @@ export function useGetWorkoutPlan() {
 
 export function useGenerateWorkoutPlan() {
   const queryClient = useQueryClient();
-  return useMutation<WeeklyPlan, Error, Profile>({
-    mutationFn: async (profile: Profile) => {
+  return useMutation<WeeklyPlan, Error, Profile | undefined>({
+    mutationFn: async (profileArg?: Profile) => {
+      const profile = profileArg ?? getProfile();
+      if (!profile) throw new Error('No profile found');
       const plan = generateWorkoutPlan(profile);
       saveWorkoutPlan(plan);
       return plan;
@@ -62,8 +64,10 @@ export function useGetMealPlan() {
 
 export function useGenerateMealPlan() {
   const queryClient = useQueryClient();
-  return useMutation<WeeklyMealPlan, Error, Profile>({
-    mutationFn: async (profile: Profile) => {
+  return useMutation<WeeklyMealPlan, Error, Profile | undefined>({
+    mutationFn: async (profileArg?: Profile) => {
+      const profile = profileArg ?? getProfile();
+      if (!profile) throw new Error('No profile found');
       const plan = generateMealPlan(profile);
       saveMealPlan(plan);
       return plan;

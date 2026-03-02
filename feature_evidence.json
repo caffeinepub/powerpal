@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-workoutplanview-tsx-change-the-background-color-of-the-your-workout-plan-banner-header-section-to-green-apply-a-solid-green-background-e-g-tailwind-class-bg-green-600-or-similar-green-shade-to-the-section-or-container-that-displays-the-your-workout-plan-heading",
-      "featureTitle": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
+      "featureId": "feature-remove-the-internet-identity-login-screen-as-the-entry-point-instead-show-a-simple-onboarding-screen-where-the-user-enters-only-their-name-and-age-then-proceeds-directly-into-the-app-without-any-authentication-step",
+      "featureTitle": "Remove the Internet Identity login screen as the entry point. Instead, show a simple onboarding screen where the user enters only their name and age, then proceeds directly into the app without any authentication step.",
       "files": [
-        "frontend/src/components/WorkoutPlanView.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/LoginScreen.tsx",
+        "frontend/src/components/OnboardingFlow.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,6 +19,30 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-persist-the-entered-name-and-age-locally-localstorage-so-the-user-does-not-need-to-re-enter-them-on-subsequent-visits-profile-data-name-age-should-be-read-from-and-written-to-localstorage-instead-of-requiring-a-logged-in-backend-actor",
+      "featureTitle": "Persist the entered name and age locally (localStorage) so the user does not need to re-enter them on subsequent visits. Profile data (name, age) should be read from and written to localStorage instead of requiring a logged-in backend actor.",
+      "files": [
+        "frontend/src/components/AdaptiveLevelsView.tsx",
+        "frontend/src/components/GoalDrivenPlansView.tsx",
+        "frontend/src/components/MealPlanView.tsx",
+        "frontend/src/components/WeeklyScheduleView.tsx",
+        "frontend/src/components/WorkoutPlanView.tsx",
+        "frontend/src/hooks/useLocalQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
       ],
       "confidence": "high"
     }

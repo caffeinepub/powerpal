@@ -10,12 +10,7 @@ import AdaptiveLevelsView from './components/AdaptiveLevelsView';
 
 const queryClient = new QueryClient();
 
-type AppView =
-  | 'workout'
-  | 'meal'
-  | 'schedule'
-  | 'goals'
-  | 'adaptive';
+type AppView = 'workout' | 'meal' | 'schedule' | 'goals' | 'adaptive';
 
 function AppContent() {
   const { data: profile, isLoading } = useGetProfile();
@@ -31,16 +26,16 @@ function AppContent() {
     );
   }
 
+  // Show onboarding if no profile exists
   if (!profile) {
     return (
       <OnboardingFlow
-        onComplete={() => {
-          setCurrentView('workout');
-        }}
+        onComplete={() => setCurrentView('workout')}
       />
     );
   }
 
+  // Main app views
   switch (currentView) {
     case 'meal':
       return (

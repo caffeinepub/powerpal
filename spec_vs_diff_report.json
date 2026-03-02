@@ -1,14 +1,23 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T20:48:13.239Z",
-  "summary": "REQ-1 is implemented in WorkoutPlanView.tsx. The 'Your Workout Plan' banner section now has a green gradient overlay applied via an absolutely-positioned div over the banner image using Tailwind classes from-green-700/90 via-green-600/70 to-green-500/40. The heading text is white with drop-shadow for legibility. The change is isolated to WorkoutPlanView.tsx and does not affect other views.",
+  "generatedAt": "2026-02-27T21:15:51.369Z",
+  "summary": "The diff implements both REQ-1 and REQ-2 comprehensively. REQ-1 is fulfilled by the new OnboardingFlow component (name + age only, no Internet Identity), the updated App.tsx routing logic (shows onboarding when no profile exists, skips it otherwise), and the LoginScreen.tsx being effectively replaced/bypassed. REQ-2 is fulfilled by the useLocalQueries.ts hooks reading/writing profile and plans to localStorage, with plan generation working without any authenticated backend actor. All acceptance criteria appear to be met.",
   "missing_requirements": [],
   "hallucinated_features": [],
-  "confidence": 0.95,
+  "confidence": 0.92,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdaptiveLevelsView.tsx",
+    "frontend/src/components/GoalDrivenPlansView.tsx",
+    "frontend/src/components/LoginScreen.tsx",
+    "frontend/src/components/MealPlanView.tsx",
+    "frontend/src/components/OnboardingFlow.tsx",
+    "frontend/src/components/WeeklyScheduleView.tsx",
     "frontend/src/components/WorkoutPlanView.tsx",
+    "frontend/src/hooks/useLocalQueries.ts",
     "project_state.json"
   ]
 }

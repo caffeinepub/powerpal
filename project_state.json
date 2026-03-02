@@ -1,29 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Fitness/workout plan app with avatar support. User wants the 'Your Workout Plan' section background changed to green.",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-in-workoutplanview-tsx-change-the-background-color-of-the-your-workout-plan-banner-header-section-to-green-apply-a-solid-green-background-e-g-tailwind-class-bg-green-600-or-similar-green-shade-to-the-section-or-container-that-displays-the-your-workout-plan-heading",
-      "title": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
+      "id": "feature-remove-the-internet-identity-login-screen-as-the-entry-point-instead-show-a-simple-onboarding-screen-where-the-user-enters-only-their-name-and-age-then-proceeds-directly-into-the-app-without-any-authentication-step",
+      "title": "Remove the Internet Identity login screen as the entry point. Instead, show a simple onboarding screen where the user enters only their name and age, then proceeds directly into the app without any authentication step.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
-    }
-  ],
-  "new_feature_requests": [
+    },
     {
-      "id": "AR-1",
-      "summary": "Change background color of 'Your Workout Plan' section to green",
-      "reqIds": [],
-      "status": "pending"
+      "id": "feature-persist-the-entered-name-and-age-locally-localstorage-so-the-user-does-not-need-to-re-enter-them-on-subsequent-visits-profile-data-name-age-should-be-read-from-and-written-to-localstorage-instead-of-requiring-a-logged-in-backend-actor",
+      "title": "Persist the entered name and age locally (localStorage) so the user does not need to re-enter them on subsequent visits. Profile data (name, age) should be read from and written to localStorage instead of requiring a logged-in backend actor.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
     }
   ],
-  "gameProjectType": "none",
+  "new_feature_requests": [],
   "projectName": "Powerpal",
   "clarification_mode": "instant",
   "clarification_rounds": 0

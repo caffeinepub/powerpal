@@ -1,34 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Change 'Your Workout Plan' section background to green",
+  "title": "Remove login requirement — replace with name/age entry to get started",
   "projectName": "Powerpal",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "In WorkoutPlanView.tsx, change the background color of the 'Your Workout Plan' banner/header section to green. Apply a solid green background (e.g., Tailwind class 'bg-green-600' or similar green shade) to the section or container that displays the 'Your Workout Plan' heading.",
+      "text": "Remove the Internet Identity login screen as the entry point. Instead, show a simple onboarding screen where the user enters only their name and age, then proceeds directly into the app without any authentication step.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "where it says your work out plan can you change the background to green"
+          "i dont want it to have a login i just want to enter my name and age and get started"
         ]
       },
       "acceptanceCriteria": [
-        "The section or banner containing the text 'Your Workout Plan' has a green background color",
-        "The heading text remains legible against the green background",
-        "No other sections or views are unintentionally affected by this color change"
+        "The app does not show an Internet Identity login button on first load.",
+        "The first screen a new user sees asks for their name and age only.",
+        "After entering name and age and submitting, the user is taken directly into the main app experience.",
+        "No authentication is required to use the app."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Persist the entered name and age locally (localStorage) so the user does not need to re-enter them on subsequent visits. Profile data (name, age) should be read from and written to localStorage instead of requiring a logged-in backend actor.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "i dont want it to have a login i just want to enter my name and age and get started"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On subsequent visits, if a name and age are already stored in localStorage, the user skips the entry screen and goes directly to the main app.",
+        "Workout and meal plan generation works without an authenticated identity.",
+        "Profile is stored and retrieved from localStorage using existing utility functions."
       ]
     }
   ],
   "constraints": [
-    "Only change the background of the 'Your Workout Plan' section in WorkoutPlanView.tsx — do not alter other views or components"
+    "Do not remove or edit files in frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts.",
+    "Do not break the existing plan generation utilities.",
+    "All user-facing text must be in English."
   ],
   "nonGoals": [
-    "Changing background colors in any other view (MealPlanView, WeeklyScheduleView, etc.)",
-    "Modifying the overall app theme or color tokens"
+    "Adding new fitness tracking features.",
+    "Keeping Internet Identity as an optional login path.",
+    "Collecting any user data beyond name and age at onboarding."
   ],
   "imageRequirements": {
     "required": [],

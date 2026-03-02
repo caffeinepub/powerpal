@@ -1,9 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Change the background color of the "Your Workout Plan" banner/header section in WorkoutPlanView to green.
+**Goal:** Remove the Internet Identity login requirement and replace it with a simple name and age onboarding screen.
 
 **Planned changes:**
-- Apply a green background (e.g., `bg-green-600`) to the section or container displaying the "Your Workout Plan" heading in `WorkoutPlanView.tsx`
+- Remove the Internet Identity login screen as the app entry point.
+- Add a new onboarding screen that asks the user for their name and age only.
+- After submitting name and age, take the user directly into the main app.
+- Store name and age in localStorage so returning users skip the onboarding screen.
+- Read profile data (name, age) from localStorage instead of an authenticated backend actor.
 
-**User-visible outcome:** The "Your Workout Plan" section header displays with a green background, with the heading text remaining legible.
+**User-visible outcome:** When opening the app for the first time, users see a simple screen asking for their name and age. After submitting, they go straight into the app. On return visits, they are taken directly to the main app without any re-entry or login required.
